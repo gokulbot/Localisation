@@ -16,10 +16,9 @@ path="/home/gokul/catkin_ws/src/ekf_localisation/scripts"
 def reader():
 
     #reading the file and extracting the necessary data 
-    if(os.getcwd()==path):
-        motor_file = open("robot4_motors.txt")
-    else:
-        motor_file = open(path+"/robot4_motors.txt")
+    
+    motor_file = open("robot4_motors.txt")
+   
 
     left = []
     right = []
@@ -37,7 +36,7 @@ def reader():
     return delta_ticks 
 
 
-def pose_update(prev_pose,ticks,ticks_to_meter,width_robo,sc_disp):
+def pose_update(prev_pose,ticks,ticks_to_meter,width_robo,scanner_displacement):
 	
 	#first case robot travels in straight line 
 	if ticks[0]==ticks[1]:
@@ -54,22 +53,22 @@ def pose_update(prev_pose,ticks,ticks_to_meter,width_robo,sc_disp):
 
 		#getting the previous parameters
 		theta=prev_pose[2]
-		x=prev_pose[0]-sc_disp*sin(theta)
-		y=prev_pose[1]-sc_disp*cos(theta)
+		x=prev_pose[0]-scanner_displacement*sin(theta)
+		y=prev_pose[1]-scanner_displacement*cos(theta)
 		
 
 		alpha=ticks_to_meter*(ticks[1]-ticks[0])/width_robo
 		R=ticks_to_meter*ticks[0]/alpha
 		
 
-        #calulating the center about which the curving happens 
+        #calulating the center of rotation
 		centerx=x-(R+width_robo/2)*sin(theta)
 		centery=y+(R+width_robo/2)*cos(theta)
 		theta+=alpha
 		
 		#updating the x and using newly calualted theta value 
-		x=centerx+(R+width_robo/2)*sin(theta)+sc_disp*sin(theta)
-		y=centery-(R+width_robo/2)*cos(theta)+sc_disp*cos(theta)
+		x=centerx+(R+width_robo/2)*sin(theta)+scanner_displacement*sin(theta)
+		y=centery-(R+width_robo/2)*cos(theta)+scanner_displacement*cos(theta)
 		
 		
 		return (x,y,theta)
@@ -86,10 +85,10 @@ def main():
 
     #getting the data and inital parameters
     ticks=reader()
-    print(ticks)
+    #print(ticks)
     ticks_to_meter=0.349
     width_robo=170
-    sc_disp =30
+    scanner_displacement =30
     
     
     #beggining pose estimation
@@ -100,7 +99,7 @@ def main():
         
         f = open("poses_from_ticks.txt", "w")
         for tick in ticks:
-            pose =pose_update(pose,tick,ticks_to_meter,width_robo,sc_disp)
+            pose =pose_update(pose,tick,ticks_to_meter,width_robo,scanner_displacement)
             X=pose[0]
             Y=pose[1]
             theta=pose[2]
