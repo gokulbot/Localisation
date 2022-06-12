@@ -1,24 +1,15 @@
 # !/usr/bin/env python
 
 # importing the necessary libraries 
-from importlib.resources import path
 import rospy
 from geometry_msgs.msg import Twist
 from math import sin, cos, pi
-import os
-
-#getting the current wotking directory
-
-path="/home/gokul/catkin_ws/src/ekf_localisation/scripts"
-
+import yaml
 
 # function to read the motorticks data from the file 
 def reader():
 
-    #reading the file and extracting the necessary data 
-    
     motor_file = open("robot4_motors.txt")
-   
 
     left = []
     right = []
@@ -61,7 +52,7 @@ def pose_update(prev_pose,ticks,ticks_to_meter,width_robo,scanner_displacement):
 		R=ticks_to_meter*ticks[0]/alpha
 		
 
-        #calulating the center of rotation
+        #calulating the center about which the curving happens 
 		centerx=x-(R+width_robo/2)*sin(theta)
 		centery=y+(R+width_robo/2)*cos(theta)
 		theta+=alpha
@@ -85,15 +76,22 @@ def main():
 
     #getting the data and inital parameters
     ticks=reader()
-    #print(ticks)
-    ticks_to_meter=0.349
-    width_robo=170
-    scanner_displacement =30
+    
+    #hardware parameters 
+
+    parameters_table = dict()
+    with open(r'params.yaml') as file:
+            parameters_table = yaml.load(file, Loader=yaml.FullLoader)
+
+    
+    ticks_to_meter = parameters_table['ticks_to_meter'] #in mm per tick
+    width_robo = parameters_table['width_robo']  #in mm
+    scanner_displacement = parameters_table['scanner_displacement']  #in mm
     
     
     #beggining pose estimation
     print("Starting Pose estimation")
-    c=0
+    
     while not rospy.is_shutdown():
         pose= (1850.0, 1897.0, 213.0 / 180.0 *pi)
         

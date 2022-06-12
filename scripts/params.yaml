@@ -1,0 +1,6 @@
+# Hardware parmeters measurements are in mm
+
+ticks_to_meter : 0.349
+width_robo : 170
+scanner_displacement: 30
+
