@@ -20,8 +20,11 @@ def callback(data):
 def sub_pose():
     #creating a node named sub_pose for subscribing the pose estimates
     rospy.init_node('sub_pub',anonymous=True)
+    rate=rospy.Rate(10)
     rospy.Subscriber('pose', Twist, callback)
 
+    
+    rate.sleep
     rospy.spin()
 
 if __name__ == '__main__':
